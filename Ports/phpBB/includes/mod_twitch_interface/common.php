@@ -28,14 +28,8 @@ if (!defined('IN_PHPBB'))
 // On start, asume we are installed correctly, check later
 define('TWITCH_INTERFACE_INSTALLED', true);
 
-// Assume we installed properly and set all of our database constants here
-define('MOD_TWITCH_INTERFACE_CONFIG',          $table_prefix . 'mod_twitch_interface_config');          // Configuration information (Overrides the defauls in the file)
-define('MOD_TWITCH_INTERFACE_OUTPUT_LOG',      $table_prefix . 'mod_twitch_interface_output_log');      // The output log from the interface
-define('MOD_TWITCH_INTERFACE_ERROR_LOG',       $table_prefix . 'mod_twitch_interface_error_log');       // The error log from the interface
-define('MOD_TWITCH_INTERFACE_LIVE_CACHE',      $table_prefix . 'mod_twitch_interface_live_cache');      // The live channel cache from the interface
-define('MOD_TWITCH_INTERFACE_CODE_CACHE',      $table_prefix . 'mod_twitch_interface_code_cache');      // The auth code cache from the interface (Works on user ID)
-
 // Include the interface structure
+require('./constants.php');        // Holds our constant vars
 require('./interface_compat.php'); // Builds the compatability with the interface calls to phpBB, load this first
 require('./interface.php');        // The base interface itself, is short circuited to stop errors
 

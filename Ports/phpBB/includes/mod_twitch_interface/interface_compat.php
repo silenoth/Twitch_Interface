@@ -96,6 +96,11 @@ class phpBBTwitch // Provides all functions to interact with the interface from 
                     self::addFollows($params[$counter]);
                 break;
                 
+                // Another really expensive call to make in the que
+                case 'delFollows':
+                    self::delFollows($params[$counter]);
+                break;
+                
                 // A catch case, break here for now
                 default:
                 break;                

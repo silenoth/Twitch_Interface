@@ -16,22 +16,12 @@
  * Author: Anthony 'IBurn36360' Diaz - 2013
  */
 
-// Make sure we meet our dependency requirements
-if (!function_exists('curl_version')) trigger_error('cURL is not currently installed on your server, please install cURL');
-if (!function_exists('json_decode')) trigger_error('PECL JSON or pear JSON is not installed, please install either PECL JSON or compile pear JSON');
-
 // Define some things in the global scope (yes...global, if you want to make it defined in the class scope, go for it)
 
 // Your API info goes here
-$twitch_clientKey = ' ';
-$twitch_clientSecret = ' ';
-$twitch_clientUrl = ' ';
-
-// Did our user forget any of their credentials?
-if (($twitch_clientKey === '' || null) || ($twitch_clientSecret === '' || null) || ($twitch_clientUrl === '' || null))
-{
-    trigger_error('Please enter your Kraken API credentials into the main file on lines 26, 27 and 28');
-}
+$twitch_clientKey = '';
+$twitch_clientSecret = '';
+$twitch_clientUrl = '';
 
 $twitch_debugLevels = array(
     'FINE' => 1,   // Displays only call inits
