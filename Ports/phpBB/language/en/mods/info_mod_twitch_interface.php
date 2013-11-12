@@ -42,8 +42,8 @@ $lang = array_merge($lang, array(
     'MOD_TWITCH_INTERFACE_NAME' => 'Twitch Interface',
 
     // Status (Live state)
-    'MOD_TWITCH_INTERFACE_IS_LIVE' => 'is live.',
-    'MOD_TWITCH_INTERFACE_IS_OFFLINE' => 'is offline.',
+    'MOD_TWITCH_INTERFACE_IS_LIVE' => 'is live',
+    'MOD_TWITCH_INTERFACE_IS_OFFLINE' => 'is offline',
     
     // UCP
     'MOD_TWITCH_INTERFACE_ADD_AUTHORIZATION'          => 'Allow our site to access your <a href="http://www.twitch.tv">Twitch.tv</a> account.',
@@ -121,6 +121,9 @@ $lang = array_merge($lang, array(
     'MOD_TWITCH_INTERFACE_LOG_GET_LIVE'            => 'Getting status of monitored channels.',
     'MOD_TWITCH_INTERFACE_LOG_FOLLOW_ADD'          => 'Adding %1$s as a followed channel to %2$s.',
     'MOD_TWITCH_INTERFACE_LOG_FOLLOW_DEL'          => 'Removing %1$s as a followed channel to %2$s.',
+    'MOD_TWITCH_INTERFACE_LOG_PARAMATERS_ERROR'    => 'Function was passed a missing or incorrect error',
+    'MOD_TWITCH_INTERFACE_LOG_FOLLOWS_SUCCESS'     => 'Successfully added all channels requested in que for users',
+    'MOD_TWITCH_INTERFACE_LOG_UNFOLLOWS_SUCCESS'   => 'Successfully removed all channels requested in que for users',
     
     // Perms
 //    'MOD_TWITCH_INTERFACE_' => '',
@@ -141,7 +144,11 @@ $lang = array_merge($lang, array(
     'MOD_TWITCH_INTERFACE_INSTALL_UNRECOGNIZED_VERSION_INSTALLED' => 'Unrecognized version found in database. Version %1$s was found in database.',
     'MOD_TWITCH_INTERFACE_INSTALL_UNINSTALLED'                    => '%1$s has been successfully uninstalled from your board.',
     'MOD_TWITCH_INTERFACE_INSTALL_BOARD_INDEX_REDIRECT'           => '<a href="%1$s">Click here</a> to return to your forum board.',
-
+    'MOD_TWITCH_INTERFACE_INSTALL_MISSING_DEPENDENCY'             => '%1$s is missing a dependency.  Version %2$s requires %3$s and %4$s. &nbsp<a href="%5$s">Click here</a> to return to the forum board.',
+    'MOD_TWITCH_INTERFACE_INSTALL_CURL'                           => 'cURL utilities',
+    'MOD_TWITCH_INTERFACE_INSTALL_JSON'                           => 'JSON utilities',
+    'MOD_TWITCH_INTERFACE_INSTALL_DEPENDENCY_FOUND'               => 'All required dependencies found, rediecting to main install page.',
+    
     'MOD_TWITCH_INTERFACE_INSTALL_' => '',
     'MOD_TWITCH_INTERFACE_INSTALL_' => '',
     'MOD_TWITCH_INTERFACE_INSTALL_' => '',
