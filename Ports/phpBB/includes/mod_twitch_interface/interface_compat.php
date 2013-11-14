@@ -17,9 +17,12 @@
  * A copy of the GNU GPLV3 license can be found at http://www.gnu.org/licenses/
  * or can be found in the folder distributed with the software.
  */ 
- 
+
 class phpBBTwitch // Provides all functions to interact with the interface from phpBB's end
 {
+    // Init the interface as a var here for OO calls
+    var $twitchInterface = twitch;
+    
     public function postError($errNo, $errStr)
     {
         global $db;
@@ -39,8 +42,8 @@ class phpBBTwitch // Provides all functions to interact with the interface from 
         global $db, $user;
         
         // A quick way of grabbing the display name from twitch
-        $token = twitch::generateToken($code);
-        $check = twitch::checkToken($token);
+        $token = $this->twitchInterface->generateToken($code);
+        $check = $this->twitchInterface->checkToken($token);
         $username = $check['name'];
         
         $collumns = array(
@@ -68,9 +71,59 @@ class phpBBTwitch // Provides all functions to interact with the interface from 
     
     public function getLiveChannels($channels = array(), $embedable = false, $hls = false)
     {
-        $live = twitch::getStreamsObjects(null, $channels, -1, 0, $embedable, $hls);
+        $result = $this->twitchInterface->getStreamsObjects(null, $channels, -1, 0, $embedable, $hls);
+        $live = array();
 
+        // Strip out the object data from the return
+        foreach ($result as $key => $value)
+        {
+            $live = array_merge($live, array($key));
+        }
+
+        // Cache the array of live channels
+        $this->cacheLive($live);
+    
+        // We should not really need this, but the return will allow any calling function in the future to use the array
         return $live;
+    }
+    
+    public static function cacheLive($data)
+    {
+        $row = '';
+        
+        // use write only mode here to delete any old cache data.  There will be a retry in the AJAX on this later if the file is being written
+        if ($cacheHandle = @fopen(MOD_TWITCH_INTERFACE_CACHE_LIVE, 'w'))
+        {
+            // Lock the file while we are accessing it (useful if the cache is attempting to be written twice at some point)
+            @flock($cacheHandle, LOCK_EX);    
+            
+            // Write the header
+            fwrite($cacheHandle, '<?php exit; ?>' . "\n");
+            // Time when the cache was constructed
+            fwrite($cacheHandle, time() . "\n");
+            // Now the number of live channels (Expected decoded returns)
+            fwrite($cacheHandle, count($data) . "\n");
+            
+            // Finally, write the data itself
+            foreach($data as $chan)
+            {
+                $row .= $chan . ':';
+            }
+            
+            $row = rtrim($row, ':');
+            fwrite($cacheHandle, $row);
+            
+            // Flush the file and unlock it
+            @flock($cacheHandle, LOCK_UN);
+            fclose($cacheHandle);
+            
+            // Make sure the file is read/write after everything is said and done
+            //phpbb_chmod(MOD_TWITCH_INTERFACE_CACHE_LIVE, CHMOD_READ | CHMOD_WRITE);
+            
+            return true;
+        }
+        
+        return false;
     }
     
     public function purgeOutput()
@@ -105,7 +158,7 @@ class phpBBTwitch // Provides all functions to interact with the interface from 
         // Did something happen when we unpacked our params?
         if (!is_array($users) || !is_array($channels) || (count($users) !== count($channels)))
         {
-            self::postOutput('phpBBTwitch::addFollows', 'MOD_TWITCH_INTERFACE_LOG_PARAMATERS_ERROR');
+            $this->postOutput('phpBBTwitch::addFollows', 'MOD_TWITCH_INTERFACE_LOG_PARAMATERS_ERROR');
             return false;
         }
         
@@ -114,17 +167,29 @@ class phpBBTwitch // Provides all functions to interact with the interface from 
         {
             // Grab the auth code so we can generate a token for the session
             $query = array();
-            $sql = 'SELECT \'code\' FROM ' . MOD_TWITCH_INTERFACE_CODE_CACHE . ' WHERE username=' . $users[$key];
+            $sql = 'SELECT \'code\' FROM ' . MOD_TWITCH_INTERFACE_CODE_CACHE . ' WHERE username=' . $db->sql_escape($users[$key]);
             $authCode = $db->sql_query($sql);
             $db->sql_freeresult($result);
             
-            twitch::followChan($users[$key], $channels[$key], null, $authCode);
+            if ($result)
+            {
+                $this->twitchInterface->followChan($users[$key], $channels[$key], null, $authCode);
+            } else {
+                $this->postOutput('phpBBTwitch::addFollows', 'User ' . $users[$key] . ' has noth authorized to allow edits to follows');
+            }
         }
         
-        self::postOutput('phpBBTwitch::addFollows', 'MOD_TWITCH_INTERFACE_LOG_FOLLOWS_SUCCESS');
+        $this->postOutput('phpBBTwitch::addFollows', 'MOD_TWITCH_INTERFACE_LOG_FOLLOWS_SUCCESS');
     }
     
-    // Expensive function, will sort through the array of params and remove channel from user's follows list
+    /**
+     * Takes a list of users and channels and attempts to remove the channel from that user's follows list
+     * 
+     * @param $users - [array] Array of all usernames in order of query
+     * @param $channels - [array] Array of all channel names in order os query
+     * 
+     * @return true on completion.
+     */ 
     public function delFollows($users, $channels)
     {
         global $db;        
@@ -132,7 +197,7 @@ class phpBBTwitch // Provides all functions to interact with the interface from 
         // Did something happen when we unpacked our params?
         if (!is_array($users) || !is_array($channels))
         {
-            self::postOutput('phpBBTwitch::addFollows', 'MOD_TWITCH_INTERFACE_LOG_PARAMATERS_ERROR');
+            $this->postOutput('phpBBTwitch::delFollows', 'MOD_TWITCH_INTERFACE_LOG_PARAMATERS_ERROR');
             return false;
         }
         
@@ -141,15 +206,21 @@ class phpBBTwitch // Provides all functions to interact with the interface from 
         {
             // Grab the auth code so we can generate a token for the session
             $query = array();
-            $sql = 'SELECT \'code\' FROM ' . MOD_TWITCH_INTERFACE_CODE_CACHE . ' WHERE username=' . $users[$key];
+            $sql = 'SELECT \'code\' FROM ' . MOD_TWITCH_INTERFACE_CODE_CACHE . ' WHERE username=' . $db->sql_escape($users[$key]);
             $authCode = $db->sql_query($sql);
             $db->sql_freeresult($result);
             
-            twitch::unfollowChan($users[$key], $channels[$key], null, $authCode);
+            if ($result)
+            {
+                $this->twitchInterface->unfollowChan($users[$key], $channels[$key], null, $authCode);
+            } else {
+                $this->postOutput('phpBBTwitch::delFollows', 'MOD_TWITCH_INTERFACE_LOG_NOT_AUTHORIZED');
+            }
         }
         
-        self::postOutput('phpBBTwitch::addFollows', 'MOD_TWITCH_INTERFACE_LOG_UNFOLLOWS_SUCCESS');
+        $this->postOutput('phpBBTwitch::delFollows', 'MOD_TWITCH_INTERFACE_LOG_UNFOLLOWS_SUCCESS');
         
+        return true;
     }
         
     // Our cron task handler
@@ -173,22 +244,7 @@ class phpBBTwitch // Provides all functions to interact with the interface from 
                     $hls       = isset($unpack[2]) ? $unpack[2] : false;
                     unset($unpack); // We are done with this now
                     
-                    self::getLiveChannels($channels, $embedable, $hls);
-                break;
-                
-                // Added to the que on request
-                case 'purgeOutput':
-                    self::purgeOutput();
-                break;
-                    
-                // Added to the que on request
-                case 'purgeErrors':
-                    self::purgeErrors();
-                break;
-                
-                // Added to the que on request
-                case 'purgeAuthorizationCodes':
-                    self::purgeAuthorizationCodes();
+                    $this->getLiveChannels($channels, $embedable, $hls);
                 break;
                     
                 // Likely the most expensive call to be made as this is done on a que.
@@ -200,7 +256,7 @@ class phpBBTwitch // Provides all functions to interact with the interface from 
                     $channels = isset($unpack[2]) ? $unpack[2] : null;
                     unset($unpack);
                     
-                    self::addFollows($users, $channels);
+                    $this->addFollows($users, $channels);
                 break;
                 
                 // Another really expensive call to make in the que
@@ -212,7 +268,7 @@ class phpBBTwitch // Provides all functions to interact with the interface from 
                     $channels = isset($unpack[2]) ? $unpack[2] : null;
                     unset($unpack);
                     
-                    self::delFollows($users, $channels);
+                    $this->delFollows($users, $channels);
                 break;
                 
                 // A catch case, break here for now

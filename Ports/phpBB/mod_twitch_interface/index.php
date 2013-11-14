@@ -12,6 +12,7 @@ $user->setup(array('acp/common', 'mods/info_mod_twitch_interface'));
 
 // Init and grab out our vars
 $authorizationCode = request_var('code', '');
+include($phpbb_root_path . 'includes/mod_twitch_interface/common.php');
 
 if ($authorizationCode == '')
 {
@@ -21,9 +22,19 @@ if ($authorizationCode == '')
     // Make sure the user is logged in and isn't a bot
     if ($user->data['user_id'] != ANONYMOUS)
     {
-        
+        // Are they a bot?
+        if ($user->$data['is_bot'])
+        {
+            // Redirect the bot away from here
+            redirect(append_sid("{$phpbb_root_path}index.$phpEx"));
+        }
     } else {
         // Force the login, keeping the code we grabbed from the query string
+        
+        
+        
+        
+        
     }    
 }
 
