@@ -46,6 +46,7 @@ if (!$auth->acl_get('a_'))
 // Set up needed tools
 include($phpbb_root_path . 'mod_twitch_interface/install/install_common.php');
 require($phpbb_root_path . 'includes/mod_twitch_interface/constants.php');
+define('IN_INSTALL', true);
 $db_tools 	= new phpbb_db_tools($db);
 $install    = new twitchInterfaceInstaller();
 $modules 	= new acp_modules();

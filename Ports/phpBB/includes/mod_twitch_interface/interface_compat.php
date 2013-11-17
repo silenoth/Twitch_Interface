@@ -77,7 +77,7 @@ class phpBBTwitch // Provides all functions to interact with the interface from 
         // Strip out the object data from the return
         foreach ($result as $key => $value)
         {
-            $live = array_merge($live, array($key));
+            $live[] = array($key);
         }
 
         // Cache the array of live channels
@@ -118,7 +118,7 @@ class phpBBTwitch // Provides all functions to interact with the interface from 
             fclose($cacheHandle);
             
             // Make sure the file is read/write after everything is said and done
-            //phpbb_chmod(MOD_TWITCH_INTERFACE_CACHE_LIVE, CHMOD_READ | CHMOD_WRITE);
+            phpbb_chmod(MOD_TWITCH_INTERFACE_CACHE_LIVE, CHMOD_READ | CHMOD_WRITE);
             
             return true;
         }
@@ -175,7 +175,7 @@ class phpBBTwitch // Provides all functions to interact with the interface from 
             {
                 $this->twitchInterface->followChan($users[$key], $channels[$key], null, $authCode);
             } else {
-                $this->postOutput('phpBBTwitch::addFollows', 'User ' . $users[$key] . ' has noth authorized to allow edits to follows');
+                $this->postOutput('phpBBTwitch::addFollows', 'User ' . $users[$key] . ' has not authorized to allow edits to follows');
             }
         }
         
@@ -280,4 +280,8 @@ class phpBBTwitch // Provides all functions to interact with the interface from 
         }
     }
 }
+$data = array('testChannel1', 'testChannel2', 'testChannel3', 'testChannel4', 'testChannel5');
+
+phpBBTwitch::cacheLive($data);
+
 ?>
