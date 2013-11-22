@@ -161,7 +161,7 @@ $lang = array_merge($lang, array(
     'MOD_TWITCH_INTERFACE_INSTALL_' => '',
     
     // Errors
-    'MOD_TWITCH_INTERFACE_ERROR_NO_MODE' => 'No mode supplied to installation, redirecting to main installation page in 5 seconds.',
+    'MOD_TWITCH_INTERFACE_ERROR_NO_MODE' => 'No mode supplied to installation, redirecting to main installation page in 5 seconds.'
 ));
 
 
