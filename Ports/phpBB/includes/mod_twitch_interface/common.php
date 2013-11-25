@@ -31,7 +31,6 @@ define('TWITCH_INTERFACE_INSTALLED', true);
 // Include the interface structure
 require('./constants.php');        // Holds our constant vars
 require('./interface_compat.php'); // Builds the compatability with the interface calls to phpBB, load this first
-require('./interface.php');        // The base interface itself
 
 // Now grab our config data
 if (!$db_tools->sql_table_exists(MOD_TWITCH_INTERFACE_CONFIG))

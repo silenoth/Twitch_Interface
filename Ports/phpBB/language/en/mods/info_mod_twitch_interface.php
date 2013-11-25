@@ -124,6 +124,7 @@ $lang = array_merge($lang, array(
     'MOD_TWITCH_INTERFACE_LOG_PARAMATERS_ERROR'    => 'Function was passed a missing or incorrect error',
     'MOD_TWITCH_INTERFACE_LOG_FOLLOWS_SUCCESS'     => 'Successfully added all channels requested in que for users',
     'MOD_TWITCH_INTERFACE_LOG_UNFOLLOWS_SUCCESS'   => 'Successfully removed all channels requested in que for users',
+    'MOD_TWITCH_INTERFACE_LOG_UNKNOWN_CONFIG'      => 'Unknown configuration value queried for',
     
     // Perms
 //    'MOD_TWITCH_INTERFACE_' => '',

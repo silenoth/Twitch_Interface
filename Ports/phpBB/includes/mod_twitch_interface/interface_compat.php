@@ -18,10 +18,50 @@
  * or can be found in the folder distributed with the software.
  */ 
 
+// Don't include these in the script if they are already loaded, but require them to be loaded either way
+require_once($phpbb_root_path . "includes/mod_twitch_interface/constants.$phpEx");
+require_once($phpbb_root_path . "includes/mod_twitch_interface/interface.$phpEx");
+
 class phpBBTwitch // Provides all functions to interact with the interface from phpBB's end
 {
-    // Init the interface as a var here for OO calls
+    // Init
     var $twitchInterface = twitch;
+    var $twitchInterfaceConfiguration = array();
+    
+    public function grabConfig($config = null)
+    {
+        global $db;
+        
+        if ($config == null)
+        {
+            // Grab the complete configuration
+            $sql = ' SELECT * FROM ' . MOD_TWITCH_INTERFACE_CONFIG . ';';
+            $result = $db->sql_query($sql);
+            $rows = $db->sql_fetchrow($result);
+            $db->sql_freeresult($result);
+            
+            foreach ($rows as $row)
+            {
+                $this->twitchInterfaceConfiguration[$row[0]] = $row[1];
+            }
+        } else {
+            // grab the specified value
+            $sql = ' SELECT * FROM ' . MOD_TWITCH_INTERFACE_CONFIG . ' WHERE config_name=\'' . $db->sql_escape($config) . '\';';
+            $result = $db->sql_query($sql);
+            $configValue = $db->sql_fetchrow($result);
+            $db->sql_freeresult($result);
+            
+            // Were we returned data?
+            if (is_array($configValue) && !empty($configValue))
+            {
+                // Store it as a config value
+                $this->twitchInterfaceConfiguration[$configValue[0]] = $configValue[1];
+            } else {
+                // Toss an error
+                $this->postError(404, 'MOD_TWITCH_INTERFACE_LOG_UNKNOWN_CONFIG');
+            }
+        }
+    }
     
     public function postError($errNo, $errStr)
     {
@@ -222,66 +262,29 @@ class phpBBTwitch // Provides all functions to interact with the interface from 
         
         return true;
     }
-        
-    // Our cron task handler
-    public function cron($cronTasks = array(), $params = array())
+    
+    // Check if we need to start cron and execute it
+    public function checkCron()
     {
-        // Keep track of where we are in the array set
-        $counter = 0;
+        global $db;
         
-        // Switch through our que of tasks to do and apply the target params to the case
-        foreach ($cronTasks as $task)
-        {
-            switch($task)
-            {
-                // The only task that will be performed on a timer.
-                case 'getLive':
-                    // Unpack our parameters
-                    $unpack = $params[$counter];
-                    
-                    $channels  = $unpack[0];  // This is required, so no need to check for the existance
-                    $embedable = isset($unpack[1]) ? $unpack[1] : false;
-                    $hls       = isset($unpack[2]) ? $unpack[2] : false;
-                    unset($unpack); // We are done with this now
-                    
-                    $this->getLiveChannels($channels, $embedable, $hls);
-                break;
-                    
-                // Likely the most expensive call to be made as this is done on a que.
-                case 'addFollows':
-                    // Unpack our parameters
-                    $unpack = $params[$counter];
-                    
-                    $users    = isset($unpack[1]) ? $unpack[1] : null;
-                    $channels = isset($unpack[2]) ? $unpack[2] : null;
-                    unset($unpack);
-                    
-                    $this->addFollows($users, $channels);
-                break;
-                
-                // Another really expensive call to make in the que
-                case 'delFollows':
-                    // Unpack our parameters
-                    $unpack = $params[$counter];
-                    
-                    $users    = isset($unpack[1]) ? $unpack[1] : null;
-                    $channels = isset($unpack[2]) ? $unpack[2] : null;
-                    unset($unpack);
-                    
-                    $this->delFollows($users, $channels);
-                break;
-                
-                // A catch case, break here for now
-                default:
-                break;                
-            }
-            
-            $counter ++;
-        }
+        // How are we doing in terms of needing to run a crontask?
+        $sql = ' SELECT * FROM ' . MOD_TWITCH_INTERFACE_CONFIG . ' WHERE config_name=\'cron_timer\';';
+        
+        
+        
+    }
+    
+    // Add a call to the stack
+    public function addCronStack()
+    {
+        
+    }
+    
+    // Remove a call from the stack
+    public function removeCronStack()
+    {
+        
     }
 }
-$data = array('testChannel1', 'testChannel2', 'testChannel3', 'testChannel4', 'testChannel5');
-
-phpBBTwitch::cacheLive($data);
-
 ?>
